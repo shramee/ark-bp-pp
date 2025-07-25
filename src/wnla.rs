@@ -10,9 +10,9 @@ use ark_std::{ops::Sub, vec, vec::Vec};
 use crate::transcript;
 use crate::util::*;
 
-use merlin::Transcript;
 use serde::{Deserialize, Serialize};
 use std::ops::{Add, Mul};
+use transcript::Transcript;
 
 /// Represents public information for the Weight Norm Linear Argument protocol.
 ///
@@ -335,6 +335,7 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
 
 #[cfg(test)]
 mod wnla_tests {
+    use crate::transcript::new_transcript;
     use crate::wnla;
     use ark_ff::UniformRand;
     use ark_starkcurve::Fr;
@@ -377,13 +378,13 @@ mod wnla_tests {
         ];
 
         let commit = wnla.commit(&l, &n);
-        let mut pt = merlin::Transcript::new(b"wnla test");
+        let mut pt = new_transcript(b"wnla test");
 
         let proof = wnla.prove(&commit, &mut pt, l, n);
 
         println!("{:?}", proof);
 
-        let mut vt = merlin::Transcript::new(b"wnla test");
+        let mut vt = new_transcript(b"wnla test");
         assert!(wnla.verify(&commit, &mut vt, proof))
     }
 }

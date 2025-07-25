@@ -7,7 +7,11 @@
 use ark_ec::CurveGroup;
 use ark_ff::PrimeField;
 use ark_serialize::CanonicalSerialize;
-use merlin::Transcript;
+pub use merlin::Transcript;
+
+pub fn new_transcript(label: &'static [u8]) -> Transcript {
+    Transcript::new(label)
+}
 
 /// Appends an elliptic curve point to the transcript.
 ///
