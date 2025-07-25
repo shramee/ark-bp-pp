@@ -3,8 +3,7 @@
 //! This module provides curve-agnostic utility functions for vector manipulations
 //! used in the Weight Norm Linear Argument and arithmetic circuit protocols.
 
-use ark_ec::CurveGroup;
-use ark_ff::{Field, Zero};
+use ark_ff::Field;
 use ark_std::{
     ops::{Add, Mul, Sub},
     vec::Vec,
@@ -27,6 +26,7 @@ use std::cmp::max;
 ///
 /// # Example
 /// ```
+/// use ark_bp_pp::util::reduce;
 /// let v = vec![1, 2, 3, 4, 5];
 /// let (even, odd) = reduce(&v);
 /// assert_eq!(even, vec![1, 3, 5]);

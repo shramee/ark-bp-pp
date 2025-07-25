@@ -4,8 +4,8 @@
 //! cryptographic challenges using the Fiat-Shamir heuristic. It works with
 //! any elliptic curve supported by ark-ec.
 
-use ark_ec::{AffineRepr, CurveGroup};
-use ark_ff::{Field, PrimeField};
+use ark_ec::CurveGroup;
+use ark_ff::PrimeField;
 use ark_serialize::CanonicalSerialize;
 use merlin::Transcript;
 
@@ -108,9 +108,8 @@ pub fn app_scalar<F: PrimeField>(label: &'static [u8], scalar: &F, t: &mut Trans
 /// * `points` - Slice of points to append
 /// * `t` - Merlin transcript to append to
 pub fn app_points<G: CurveGroup>(label: &'static [u8], points: &[G], t: &mut Transcript) {
-    for (i, point) in points.iter().enumerate() {
-        let point_label = format!("{}_{}", std::str::from_utf8(label).unwrap(), i);
-        app_point(point_label.as_bytes(), point, t);
+    for point in points.iter() {
+        app_point(label, point, t);
     }
 }
 
@@ -123,17 +122,16 @@ pub fn app_points<G: CurveGroup>(label: &'static [u8], points: &[G], t: &mut Tra
 /// * `scalars` - Slice of scalars to append
 /// * `t` - Merlin transcript to append to
 pub fn app_scalars<F: PrimeField>(label: &'static [u8], scalars: &[F], t: &mut Transcript) {
-    for (i, scalar) in scalars.iter().enumerate() {
-        let scalar_label = format!("{}_{}", std::str::from_utf8(label).unwrap(), i);
-        app_scalar(scalar_label.as_bytes(), scalar, t);
+    for scalar in scalars.iter() {
+        app_scalar(label, scalar, t);
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ark_bls12_381::{Fr, G1Projective};
-    use ark_std::rand::Rng;
+    use ark_bls12_381::G1Projective;
+    use ark_ff::UniformRand;
     use ark_std::test_rng;
 
     #[test]

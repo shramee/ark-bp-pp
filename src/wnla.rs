@@ -3,10 +3,9 @@
 //! This implementation provides a curve-agnostic version of the Weight Norm Linear Argument (WNLA)
 //! protocol from Bulletproofs++. It works with any elliptic curve supported by the ark-ec library.
 
-use ark_ec::{AffineRepr, CurveGroup, VariableBaseMSM};
-use ark_ff::{Field, One, Zero};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use ark_std::{cfg_into_iter, cfg_iter, cfg_iter_mut, format, ops::Neg, vec, vec::Vec};
+use ark_ec::CurveGroup;
+use ark_ff::{Field, One};
+use ark_std::{ops::Sub, vec, vec::Vec};
 
 use crate::transcript;
 use crate::util::*;
@@ -59,8 +58,8 @@ pub struct Proof<G: CurveGroup> {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct SerializableProof<G: CurveGroup>
 where
-    G::Affine: Serialize + for<'de> Deserialize<'de>,
-    G::ScalarField: Serialize + for<'de> Deserialize<'de>,
+    G::Affine: Serialize + for<'da> Deserialize<'da>,
+    G::ScalarField: Serialize + for<'ds> Deserialize<'ds>,
 {
     /// Vector of R commitments in affine coordinates
     pub r: Vec<G::Affine>,
@@ -179,7 +178,7 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
         t.append_u64(b"n.sz", self.g_vec.len() as u64);
 
         // Generate challenge from transcript
-        let y = transcript::get_challenge(b"wnla_challenge", t);
+        let y = transcript::get_challenge::<G>(b"wnla_challenge", t);
 
         // Compute reduced vectors
         let h_ = vector_add(&h0, &vector_mul_on_scalar(&h1, &y));
@@ -296,7 +295,7 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
         t.append_u64(b"n.sz", n.len() as u64);
 
         // Generate challenge from transcript
-        let y = transcript::get_challenge(b"wnla_challenge", t);
+        let y = transcript::get_challenge::<G>(b"wnla_challenge", t);
 
         // Compute reduced vectors
         let h_ = vector_add(&h0, &vector_mul_on_scalar(&h1, &y));
