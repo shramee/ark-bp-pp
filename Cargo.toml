@@ -2,5 +2,16 @@
 name = "ark-bp-pp"
 version = "0.1.0"
 edition = "2024"
+authors = ["Shramee <shramee.srivastav@gmail.com>"]
+license = "MIT"
+description = "Bulletproofs++ on Ark Algebra"
+categories = ["cryptography"]
+keywords = ["bulletproofs++", "crypto", "rangeproofs", "zeroknowledge", "zkp"]
+readme = "README.md"
 
 [dependencies]
+k256 = { version = "0.13.3", features = ["serde"]}
+merlin = "3.0.0"
+serde = { version = "1.0.197", features = ["derive"] }
+serde_json = "1.0.114"
+criterion = "0.5.1"
