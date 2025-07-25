@@ -332,3 +332,57 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
         proof
     }
 }
+
+#[cfg(test)]
+mod wnla_tests {
+    use crate::wnla;
+    use ark_bls12_381::{Fr, G1Projective};
+    use ark_ff::UniformRand;
+    use ark_std::ops::Mul;
+    use ark_std::test_rng;
+
+    #[test]
+    fn wnla_works() {
+        const N: i32 = 4;
+
+        let mut rand = test_rng();
+
+        let g = G1Projective::rand(&mut rand);
+        let g_vec = (0..N).map(|_| G1Projective::rand(&mut rand)).collect();
+        let h_vec = (0..N).map(|_| G1Projective::rand(&mut rand)).collect();
+        let c = (0..N).map(|_| Fr::rand(&mut rand)).collect();
+        let rho = Fr::rand(&mut rand);
+
+        let wnla = wnla::WeightNormLinearArgument {
+            g,
+            g_vec,
+            h_vec,
+            c,
+            rho,
+            mu: rho.mul(&rho),
+        };
+
+        let l = vec![
+            Fr::from(1 as u32),
+            Fr::from(2 as u32),
+            Fr::from(3 as u32),
+            Fr::from(4 as u32),
+        ];
+        let n = vec![
+            Fr::from(8 as u32),
+            Fr::from(7 as u32),
+            Fr::from(6 as u32),
+            Fr::from(5 as u32),
+        ];
+
+        let commit = wnla.commit(&l, &n);
+        let mut pt = merlin::Transcript::new(b"wnla test");
+
+        let proof = wnla.prove(&commit, &mut pt, l, n);
+
+        println!("{:?}", proof);
+
+        let mut vt = merlin::Transcript::new(b"wnla test");
+        assert!(wnla.verify(&commit, &mut vt, proof))
+    }
+}
