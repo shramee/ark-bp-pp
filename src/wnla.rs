@@ -336,8 +336,9 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
 #[cfg(test)]
 mod wnla_tests {
     use crate::wnla;
-    use ark_bls12_381::{Fr, G1Projective};
     use ark_ff::UniformRand;
+    use ark_starkcurve::Fr;
+    use ark_starkcurve::Projective;
     use ark_std::ops::Mul;
     use ark_std::test_rng;
 
@@ -347,9 +348,9 @@ mod wnla_tests {
 
         let mut rand = test_rng();
 
-        let g = G1Projective::rand(&mut rand);
-        let g_vec = (0..N).map(|_| G1Projective::rand(&mut rand)).collect();
-        let h_vec = (0..N).map(|_| G1Projective::rand(&mut rand)).collect();
+        let g = Projective::rand(&mut rand);
+        let g_vec = (0..N).map(|_| Projective::rand(&mut rand)).collect();
+        let h_vec = (0..N).map(|_| Projective::rand(&mut rand)).collect();
         let c = (0..N).map(|_| Fr::rand(&mut rand)).collect();
         let rho = Fr::rand(&mut rand);
 

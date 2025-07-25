@@ -130,14 +130,14 @@ pub fn app_scalars<F: PrimeField>(label: &'static [u8], scalars: &[F], t: &mut T
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ark_bls12_381::G1Projective;
     use ark_ff::UniformRand;
+    use ark_starkcurve::Projective;
     use ark_std::test_rng;
 
     #[test]
     fn test_transcript_consistency() {
         let mut rng = test_rng();
-        let point = G1Projective::rand(&mut rng);
+        let point = Projective::rand(&mut rng);
 
         // Test that same point produces same transcript state
         let mut t1 = Transcript::new(b"test");
@@ -146,8 +146,8 @@ mod tests {
         app_point(b"point", &point, &mut t1);
         app_point(b"point", &point, &mut t2);
 
-        let challenge1 = get_challenge::<G1Projective>(b"challenge", &mut t1);
-        let challenge2 = get_challenge::<G1Projective>(b"challenge", &mut t2);
+        let challenge1 = get_challenge::<Projective>(b"challenge", &mut t1);
+        let challenge2 = get_challenge::<Projective>(b"challenge", &mut t2);
 
         assert_eq!(challenge1, challenge2);
     }
@@ -155,8 +155,8 @@ mod tests {
     #[test]
     fn test_different_points_different_challenges() {
         let mut rng = test_rng();
-        let point1 = G1Projective::rand(&mut rng);
-        let point2 = G1Projective::rand(&mut rng);
+        let point1 = Projective::rand(&mut rng);
+        let point2 = Projective::rand(&mut rng);
 
         let mut t1 = Transcript::new(b"test");
         let mut t2 = Transcript::new(b"test");
@@ -164,8 +164,8 @@ mod tests {
         app_point(b"point", &point1, &mut t1);
         app_point(b"point", &point2, &mut t2);
 
-        let challenge1 = get_challenge::<G1Projective>(b"challenge", &mut t1);
-        let challenge2 = get_challenge::<G1Projective>(b"challenge", &mut t2);
+        let challenge1 = get_challenge::<Projective>(b"challenge", &mut t1);
+        let challenge2 = get_challenge::<Projective>(b"challenge", &mut t2);
 
         assert_ne!(challenge1, challenge2);
     }
