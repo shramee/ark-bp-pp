@@ -13,10 +13,10 @@ use hashbrown::HashMap;
 /// - `NO`: Norm component
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WitnessLocation {
-    LO(usize),
-    LL(usize),
-    LR(usize),
-    NO(usize),
+    LO,
+    LL,
+    LR,
+    NO,
 }
 
 // Witness layout mapping function type

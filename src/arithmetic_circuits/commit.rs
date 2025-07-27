@@ -10,22 +10,43 @@ use crate::{
         utils::{LayoutMapFn, WitnessLocation},
         ArithmeticCircuit,
     },
-    util::sample_random_vector,
-    vector_mul,
+    util::{sample_random_vector, vector_mul},
 };
+
+// The degree of freedom is how the vector wO is represented in the vectors (nO,lO,lL,lR)
 
 impl<G> ArithmeticCircuit<G::ScalarField, G>
 where
     G: CurveGroup + PrimeGroup,
 {
-    /// CommitR Subroutine  
+    /// Creates a commitment for the output (O) and left (L) witness vectors.
+    /// CX := rX,0*G + ⟨rX,1:||lX, H⟩ + ⟨nX, G⟩
+    pub fn commitment(&self, w_x: &Vec<G::ScalarField>, r: &[G::ScalarField; 8]) -> G::ScalarField {
+        let rnd_bar_l_x = [&r[1..], &w_x[..]].concat();
+        r[0] * self.g + vector_mul(&rnd_bar_l_x, &self.h_vec) + vector_mul(w_x, &self.g_vec)
+    }
+
+    /// Map output witness `wO` to norm and linear components using layout function `F`
+    /// @TODO: Not super sure this is how it should work
+    pub fn witness_map(
+        w_o: &Vec<G::ScalarField>,
+        loc: WitnessLocation,
+        f: &LayoutMapFn,
+    ) -> Vec<G::ScalarField> {
+        let f0 = G::ScalarField::default();
+        f.iter()
+            .map(|(i, l)| if &loc == l { w_o[*i] } else { f0 })
+            .collect()
+    }
+
+    /// CommitR Subroutine
     /// Creates commitment for the right (R) witness vector[1]
     /// **Input**: `wO` (output witness), `wR` (right witness), `F` (layout function)
     /// **Process**:
     /// 1. Generate random blinding factors `r'R ∈ F^4`
     /// 2. Construct blinding vector: `rR := (r'R[0], r'R[1], 0, r'R[2], r'R[3], 0, 0, 0) ∈ F^8`
     /// 3. Set `nR := wR ∈ F^Nm` (norm component from right witness)
-    /// 4. Map output witness to linear component: `lR,j := wO,i if F^-1(lR, j) = i, else 0`
+    /// 4. Output witness by type: `lR,j := wO,i if F^-1(lR, j) = i, else 0`
     /// 5. Compute commitment: `CR := rR,0*G + ⟨rR,1:||lR, H⟩ + ⟨nR, G⟩`
     pub fn commit_r(
         self,
@@ -33,10 +54,10 @@ where
         w_r: Vec<G::ScalarField>,
         f: LayoutMapFn,
     ) -> (
-        [G::ScalarField; 8],
-        Vec<G::ScalarField>,
-        Vec<G::ScalarField>,
-        G::ScalarField,
+        [G::ScalarField; 8], // r_R
+        Vec<G::ScalarField>, // n_R
+        Vec<G::ScalarField>, // l_R
+        G::ScalarField,      // C_R
     ) {
         // Sample r'R ∈ F^4
         let [r_r0, r_r1, r_r2, r_r3] = sample_random_vector::<G::ScalarField, 4>();
@@ -50,20 +71,11 @@ where
         // `nR := wR ∈ F^Nm
         let n_r = w_r.clone(); // Norm component from right witness
 
-        // Map output witness to linear component: `lR,j := wO,i if F^-1(lR, j) = i, else 0`
-        // Not super sure this is how it should work
-        let l_r: Vec<G::ScalarField> = f
-            .iter()
-            .map(|(_, loc)| match loc {
-                WitnessLocation::LO(i) => w_o[*i],
-                _ => G::ScalarField::default(),
-            })
-            .collect();
+        // lR,j := wO,i if F^-1(lR, j) = i, else 0
+        let l_r = Self::witness_map(&w_o, WitnessLocation::LR, &f);
 
         // CR := rR,0*G + ⟨rR,1:||lR, H⟩ + ⟨nR, G⟩
-        let c_r = r_r[0] * self.g
-            + vector_mul(&[&r_r[1..], &l_r[..]].concat(), &self.h_vec)
-            + vector_mul(&n_r, &self.g_vec); // Assuming g is a generator point
+        let c_r = self.commitment(&l_r, &r_r); // Assuming g is a generator point
 
         (r_r, n_r, l_r, c_r)
     }
