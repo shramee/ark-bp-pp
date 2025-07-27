@@ -21,14 +21,14 @@ where
 {
     /// Creates a commitment for the output (O) and left (L) witness vectors.
     /// CX := rX,0*G + ⟨rX,1:||lX, H⟩ + ⟨nX, G⟩
-    pub fn commitment(&self, w_x: &Vec<G::ScalarField>, r: &[G::ScalarField; 8]) -> G::ScalarField {
+    fn commitment(&self, w_x: &Vec<G::ScalarField>, r: &[G::ScalarField; 8]) -> G::ScalarField {
         let rnd_bar_l_x = [&r[1..], &w_x[..]].concat();
         r[0] * self.g + vector_mul(&rnd_bar_l_x, &self.h_vec) + vector_mul(w_x, &self.g_vec)
     }
 
     /// Map output witness `wO` to norm and linear components using layout function `F`
     /// @TODO: Not super sure this is how it should work
-    pub fn witness_map(
+    fn witness_map(
         w_o: &Vec<G::ScalarField>,
         loc: WitnessLocation,
         f: &LayoutMapFn,
@@ -49,10 +49,10 @@ where
     /// 4. Output witness by type: `lR,j := wO,i if F^-1(lR, j) = i, else 0`
     /// 5. Compute commitment: `CR := rR,0*G + ⟨rR,1:||lR, H⟩ + ⟨nR, G⟩`
     pub fn commit_r(
-        self,
-        w_o: Vec<G::ScalarField>,
-        w_r: Vec<G::ScalarField>,
-        f: LayoutMapFn,
+        &self,
+        w_o: &Vec<G::ScalarField>,
+        w_r: &Vec<G::ScalarField>,
+        f: &LayoutMapFn,
     ) -> (
         [G::ScalarField; 8], // r_R
         Vec<G::ScalarField>, // n_R
@@ -72,7 +72,7 @@ where
         let n_r = w_r.clone(); // Norm component from right witness
 
         // lR,j := wO,i if F^-1(lR, j) = i, else 0
-        let l_r = Self::witness_map(&w_o, WitnessLocation::LR, &f);
+        let l_r = Self::witness_map(&w_o, WitnessLocation::LR, f);
 
         // CR := rR,0*G + ⟨rR,1:||lR, H⟩ + ⟨nR, G⟩
         let c_r = self.commitment(&l_r, &r_r); // Assuming g is a generator point
@@ -94,10 +94,10 @@ where
     ///    - `lX,j := wO,i if F^-1(lX, j) = i, else 0`
     /// 5. Compute commitments: `CX := rX,0*G + ⟨rX,1:||lX, H⟩ + ⟨nX, G⟩` for X = L, O
     pub fn commit_ol(
-        self,
-        w_o: Vec<G::ScalarField>,
-        w_l: Vec<G::ScalarField>,
-        f: LayoutMapFn,
+        &self,
+        w_o: &Vec<G::ScalarField>,
+        w_l: &Vec<G::ScalarField>,
+        f: &LayoutMapFn,
     ) -> (
         [G::ScalarField; 8], // r_O
         [G::ScalarField; 8], // r_L
@@ -123,12 +123,12 @@ where
         // nL := wL ∈ F^Nm
         let n_l = w_l.clone();
         // nO,j := wO,i if F^-1(nO, j) = i, else 0
-        let n_o = Self::witness_map(&w_o, WitnessLocation::NO, &f);
+        let n_o = Self::witness_map(&w_o, WitnessLocation::NO, f);
 
         // lO,j := wO,i if F^-1(lO, j) = i, else 0
-        let l_o = Self::witness_map(&w_o, WitnessLocation::LO, &f);
+        let l_o = Self::witness_map(&w_o, WitnessLocation::LO, f);
         // lL,j := wO,i if F^-1(lL, j) = i, else 0
-        let l_l = Self::witness_map(&w_o, WitnessLocation::LL, &f);
+        let l_l = Self::witness_map(&w_o, WitnessLocation::LL, f);
 
         // CL := rL,0*G + ⟨rL,1:||lL, H⟩ + ⟨nL, G⟩
         let c_l = self.commitment(&l_l, &r_l);
