@@ -6,9 +6,17 @@
 use ark_ff::Field;
 use ark_std::{
     ops::{Add, Mul, Sub},
+    rand::SeedableRng,
     vec::Vec,
 };
 use std::cmp::max;
+
+/// Generates a random vector of field elements.
+/// This is used for creating random blinding factors vectors.
+pub fn sample_random_vector<F: Field>(n: usize) -> Vec<F> {
+    let mut rng = ark_std::rand::rngs::StdRng::from_entropy();
+    (0..n).map(|_| F::rand(&mut rng)).collect::<Vec<F>>()
+}
 
 /// Reduces a vector by splitting it into even and odd indexed components.
 ///
