@@ -22,7 +22,7 @@ $$r_R, n_R, l_R, C_R := \text{CommitR}(w_O, w_R, \mathcal{F})`$$
 2. $`\mathcal{P}, \mathcal{V}`$ run the Inner Arithmetic Circuit protocol $`\langle\mathcal{P}_{iac}, \mathcal{V}_{iac}\rangle`$.
 
 ## 2. CommitOL Subroutine
-#### Implemented in [commit_ol.rs](./commit_ol.rs)
+#### Implemented in [commit.rs](./commit.rs)
 From section **5.3 Full Protocol Description** (of **5 Arithmetic circuits**),
 
 **Input**: $`w_O, w_L, \mathcal{F}`$
@@ -45,7 +45,7 @@ $`C_X := r_{X,0}G + \langle r_{X,1:}||l_X, \mathbf{H}\rangle + \langle n_X, \mat
 Return $`r_O, r_L, n_O, n_L, l_O, l_L, C_O, C_L`$
 
 ## 3. CommitR Subroutine
-#### Implemented in [commit_r.rs](./commit_r.rs)
+#### Implemented in [commit.rs](./commit.rs)
 From section **5.3 Full Protocol Description** (of **5 Arithmetic circuits**),
 
 **Input**: $`w_O, w_R, \mathcal{F}`$

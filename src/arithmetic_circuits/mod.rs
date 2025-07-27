@@ -1,2 +1,3 @@
-mod commit_r;
+mod commit;
+mod inner_circuit;
 mod utils;
