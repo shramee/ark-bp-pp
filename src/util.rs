@@ -13,9 +13,13 @@ use std::cmp::max;
 
 /// Generates a random vector of field elements.
 /// This is used for creating random blinding factors vectors.
-pub fn sample_random_vector<F: Field>(n: usize) -> Vec<F> {
+pub fn sample_random_vector<F: Field, const N: usize>() -> [F; N] {
     let mut rng = ark_std::rand::rngs::StdRng::from_entropy();
-    (0..n).map(|_| F::rand(&mut rng)).collect::<Vec<F>>()
+    let mut vec = [F::zero(); N];
+    for i in 0..N {
+        vec[i] = F::rand(&mut rng);
+    }
+    vec
 }
 
 /// Reduces a vector by splitting it into even and odd indexed components.
