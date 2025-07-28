@@ -57,17 +57,18 @@ pub fn app_point<G: CurveGroup>(label: &'static [u8], p: &G, t: &mut Transcript)
 /// # Security Note
 /// The challenge generation uses cryptographically secure randomness
 /// derived from the transcript state, ensuring unpredictability.
-pub fn get_challenge<G: CurveGroup>(label: &'static [u8], t: &mut Transcript) -> G::ScalarField
-where
-    G::ScalarField: PrimeField,
-{
+pub fn get_challenge<F: PrimeField>(label: &'static [u8], t: &mut Transcript) -> F {
+    let field_size = F::MODULUS_BIT_SIZE as usize;
+
     // Get challenge bytes from transcript
-    let mut buf = vec![0u8; 64]; // Use 64 bytes for better security margin
+
+    // 2x bytes for a double-width scalar to ensure a uniform distribution
+    // [merlin protocol](https://merlin.cool/use/protocol.html)
+    let mut buf = vec![0u8; (field_size + 3) / 4];
     t.challenge_bytes(label, &mut buf);
 
     // Convert bytes to field element using hash-to-field
-    // This ensures uniform distribution in the scalar field
-    G::ScalarField::from_be_bytes_mod_order(&buf)
+    F::from_be_bytes_mod_order(&buf)
 }
 
 /// Alternative implementation using a specific field size
@@ -134,9 +135,11 @@ pub fn app_scalars<F: PrimeField>(label: &'static [u8], scalars: &[F], t: &mut T
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ark_ec::PrimeGroup;
     use ark_ff::UniformRand;
     use ark_starkcurve::Projective;
     use ark_std::test_rng;
+    type F = <Projective as PrimeGroup>::ScalarField;
 
     #[test]
     fn test_transcript_consistency() {
@@ -150,8 +153,8 @@ mod tests {
         app_point(b"point", &point, &mut t1);
         app_point(b"point", &point, &mut t2);
 
-        let challenge1 = get_challenge::<Projective>(b"challenge", &mut t1);
-        let challenge2 = get_challenge::<Projective>(b"challenge", &mut t2);
+        let challenge1 = get_challenge::<F>(b"challenge", &mut t1);
+        let challenge2 = get_challenge::<F>(b"challenge", &mut t2);
 
         assert_eq!(challenge1, challenge2);
     }
@@ -168,8 +171,8 @@ mod tests {
         app_point(b"point", &point1, &mut t1);
         app_point(b"point", &point2, &mut t2);
 
-        let challenge1 = get_challenge::<Projective>(b"challenge", &mut t1);
-        let challenge2 = get_challenge::<Projective>(b"challenge", &mut t2);
+        let challenge1 = get_challenge::<F>(b"challenge", &mut t1);
+        let challenge2 = get_challenge::<F>(b"challenge", &mut t2);
 
         assert_ne!(challenge1, challenge2);
     }

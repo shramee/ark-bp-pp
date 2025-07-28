@@ -178,7 +178,7 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
         t.append_u64(b"n.sz", self.g_vec.len() as u64);
 
         // Generate challenge from transcript
-        let y = transcript::get_challenge::<G>(b"wnla_challenge", t);
+        let y = transcript::get_challenge::<G::ScalarField>(b"wnla_challenge", t);
 
         // Compute reduced vectors
         let h_ = vector_add(&h0, &vector_mul_on_scalar(&h1, &y));
@@ -295,7 +295,7 @@ impl<G: CurveGroup> WeightNormLinearArgument<G> {
         t.append_u64(b"n.sz", n.len() as u64);
 
         // Generate challenge from transcript
-        let y = transcript::get_challenge::<G>(b"wnla_challenge", t);
+        let y = transcript::get_challenge::<G::ScalarField>(b"wnla_challenge", t);
 
         // Compute reduced vectors
         let h_ = vector_add(&h0, &vector_mul_on_scalar(&h1, &y));
