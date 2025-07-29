@@ -83,10 +83,10 @@ pub struct Witness<F: PrimeField> {
 
 /// Represents arithmetic circuit.
 /// P - partition function.
-pub struct ArithmeticCircuit<'a, C, P>
+pub struct ArithmeticCircuit<C, P>
 where
     C: CurveGroup,
-    P: Fn(PartitionType, usize) -> Option<usize> + 'a,
+    P: Fn(PartitionType, usize) -> Option<usize>,
 {
     pub dim_nm: usize,
     pub dim_no: usize,

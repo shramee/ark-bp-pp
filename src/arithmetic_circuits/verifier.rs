@@ -9,7 +9,7 @@ use crate::{
     wnla::{self, WeightNormLinearArgument},
 };
 
-impl<'a, C, P> ArithmeticCircuit<'a, C, P>
+impl<'a, C, P> ArithmeticCircuit<C, P>
 where
     C: CurveGroup,
     P: Fn(PartitionType, usize) -> Option<usize> + 'a,

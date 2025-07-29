@@ -9,14 +9,14 @@ use merlin::Transcript;
 
 use crate::{transcript, util::*, wnla::WeightNormLinearArgument};
 
-impl<'a, C, P> ArithmeticCircuit<'a, C, P>
+impl<'a, C, P> ArithmeticCircuit<C, P>
 where
     C: CurveGroup,
     P: Fn(PartitionType, usize) -> Option<usize> + 'a,
 {
     /// Creates arithmetic circuit proof for the corresponding witness. Also, `v` commitments vector
     /// should correspond input witness in `witness` argument.
-    pub fn prove<R: RngCore + CryptoRng>(
+    pub fn prove<R: RngCore>(
         &self,
         v: &[C],
         witness: Witness<C::ScalarField>,

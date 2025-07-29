@@ -4,7 +4,7 @@ use ark_std::vec::Vec;
 
 use crate::util::*;
 
-impl<'a, C, P> ArithmeticCircuit<'a, C, P>
+impl<'a, C, P> ArithmeticCircuit<C, P>
 where
     C: CurveGroup,
     P: Fn(PartitionType, usize) -> Option<usize> + 'a,
