@@ -1,0 +1,18 @@
+[package]
+name = "k256-tests"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+merlin = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+criterion = { workspace = true }
+ark-ff = { workspace = true }
+ark-ec = { workspace = true }
+ark-serialize = { workspace = true }
+ark-std = { workspace = true }
+ark-starkcurve = { workspace = true }
+hashbrown = { workspace = true }
+bp-pp = { version = "0.1.1", path = "../../bp-pp" }
+k256 = "0.13.4"

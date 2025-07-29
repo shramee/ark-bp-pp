@@ -1,5 +1,5 @@
 [workspace]
-members = ["."]
+members = [".", "k256-tests"]
 resolver = "2"
 
 [workspace.dependencies]
