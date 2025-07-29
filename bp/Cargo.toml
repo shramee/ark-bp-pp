@@ -1,13 +1,12 @@
 [package]
-name = "ark-bp-pp"
+name = "ark-bp"
 version = "0.1.0"
 edition = "2024"
 authors = ["Shramee <shramee.srivastav@gmail.com>"]
 license = "MIT"
-description = "Bulletproofs++ on Ark Algebra"
+description = "Bulletproofs on Ark Algebra"
 categories = ["cryptography"]
-keywords = ["bulletproofs++", "crypto", "rangeproofs", "zeroknowledge", "zkp"]
-readme = "README.md"
+keywords = ["bulletproofs", "crypto", "rangeproofs", "zeroknowledge", "zkp"]
 
 [dependencies]
 merlin = { workspace = true }
@@ -22,3 +21,7 @@ hashbrown = { workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
+
+[[bench]]
+name = "bulletproofs"
+harness = false
