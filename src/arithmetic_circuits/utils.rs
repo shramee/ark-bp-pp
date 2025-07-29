@@ -28,14 +28,22 @@ type Matrix<T> = Vec<Vec<T>>;
 /// Common inputs for arithmetic circuit protocols
 #[derive(Debug, Clone)]
 pub struct ArithmeticCircuit<G, F> {
-    pub g: G,                  // G ∈ G
-    pub g_vec: Vec<G>,         // G ∈ G^Nm
-    pub h_vec: Vec<G>,         // H ∈ G^(Nv+7)
+    // Generators for commitments
+    pub g: G,          // G ∈ G
+    pub g_vec: Vec<G>, // G ∈ G^Nm
+    pub h_vec: Vec<G>, // H ∈ G^(Nv+7)
+
+    // In BP++, an arithmetic circuit C will be represented using:
+    // 2 matrices (Wl,Wm), 2 vectors (al,am) and 2 binary flags (fl,fm).
+    //
     pub wm: Matrix<F>,         // Wm ∈ F^(Nm×Nw)
-    pub am: Vec<F>,            // am ∈ F^Nm
     pub wl: Matrix<F>,         // Wl ∈ F^(Nl×Nw)
+    pub am: Vec<F>,            // am ∈ F^Nm
     pub al: Vec<F>,            // al ∈ F^Nl
     pub fl: bool,              // fl ∈ {0,1}
     pub fm: bool,              // fm ∈ {0,1}
     pub v_commitments: Vec<G>, // V ∈ G^k
+    pub nm: usize,             // Nm ∈ N
+    pub nl: usize,             // Nm ∈ N
+    pub na: usize,             // Nl ∈ N
 }

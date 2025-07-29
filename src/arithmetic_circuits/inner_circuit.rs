@@ -33,7 +33,9 @@ where
         let beta: G::ScalarField = get_challenge(b"beta", transcript);
         let delta: G::ScalarField = get_challenge(b"delta", transcript);
 
-        //
+        // μ := ρ² ∈ F
+        let mu = rho * rho;
+
         todo!()
     }
 }
