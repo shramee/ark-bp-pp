@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 pub mod conv_print_utils;
+pub mod types_conv;
 pub use conv_print_utils::*;
 
 #[cfg(test)]
@@ -17,7 +18,7 @@ mod circuit_tests {
     use k256::{ProjectivePoint, Scalar};
     use std::ops::Sub;
 
-    use crate::{pt_a, pt_k, UniPrint};
+    use crate::{pt_a, pt_k, UnifiedPrint};
 
     #[test]
     fn k256() {
