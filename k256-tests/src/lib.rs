@@ -1,127 +1,11 @@
 #![allow(non_snake_case)]
 
-use std::fmt::Display;
-
-use ark_ec::short_weierstrass::SWCurveConfig;
-use ark_ec::AffineRepr;
-use ark_ec::CurveGroup;
-use ark_ff::Field;
-use ark_ff::{BigInteger, PrimeField};
-use ark_secp256k1::Fq;
-use ark_secp256k1::{Affine, Config as ArkConf, Fr, Projective};
-use k256::elliptic_curve::group::GroupEncoding;
-use k256::elliptic_curve::point::AffineCoordinates;
-use k256::elliptic_curve::PrimeField as KPrimeField;
-use k256::FieldBytes;
-use k256::FieldElement;
-use k256::{AffinePoint, ProjectivePoint, Scalar};
-use std::ops::{Mul, Sub};
-
-trait UniPri {
-    fn upr(self) -> String;
-}
-
-impl UniPri for Fr {
-    fn upr(self) -> String {
-        format!("{}", hex(&self.into_bigint().to_bytes_be()))
-    }
-}
-
-impl UniPri for Scalar {
-    fn upr(self) -> String {
-        format!("{}", hex(&self.to_bytes()))
-    }
-}
-
-impl UniPri for Projective {
-    fn upr(self) -> String {
-        self.into_affine().upr()
-    }
-}
-impl UniPri for Affine {
-    fn upr(self) -> String {
-        let (x, _) = self.xy().unwrap();
-
-        format!("{}", hex(&x.into_bigint().to_bytes_be()))
-    }
-}
-
-impl UniPri for ProjectivePoint {
-    fn upr(self) -> String {
-        self.to_affine().upr()
-    }
-}
-impl UniPri for AffinePoint {
-    fn upr(self) -> String {
-        format!("{}", hex(&self.x()))
-    }
-}
-
-impl<T: UniPri + Copy> UniPri for &[T] {
-    fn upr(self) -> String {
-        let mut ret = String::new();
-
-        self.iter().for_each(|f| {
-            ret.push_str("\n");
-            ret.push_str(&f.upr());
-        });
-        ret
-    }
-}
-
-impl<T: UniPri + Copy> Display for T {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "  {}", self.upr())
-    }
-}
-
-fn kscalar_to_ark(s: &Scalar) -> Fr {
-    let bytes = s.to_bytes();
-    Fr::from_be_bytes_mod_order(&bytes)
-}
-
-fn ark_scalar_to_k(s: &Fr) -> Scalar {
-    let str = s.into_bigint().to_string();
-    Scalar::from_str_vartime(&str).unwrap()
-}
-
-fn kpoint_to_ark(p: &ProjectivePoint) -> Projective {
-    let p = p.to_affine();
-    let xf = Fq::from_be_bytes_mod_order(&p.x.to_bytes());
-    let yf = Fq::from_be_bytes_mod_order(&p.y.to_bytes());
-    Projective::new(xf, yf, Fq::ONE)
-}
-
-fn ark_point_to_k(p: &Projective) -> ProjectivePoint {
-    let a = p.into_affine();
-    let xs = p.x.into_bigint().to_string();
-    let ys = p.y.into_bigint().to_string();
-
-    AffinePoint::new(
-        FieldElement::from_str_vartime(&xs).unwrap(),
-        FieldElement::from_str_vartime(&ys).unwrap(),
-    )
-    .into()
-}
-
-/// Convert bytes to uppercase hex string
-pub fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|b| format!("{:02X}", b)).collect()
-}
-
-fn k256_pt(n: u32) -> ProjectivePoint {
-    let n = Scalar::from(n);
-    k256::ProjectivePoint::GENERATOR.mul(n)
-}
-
-fn ark_pt(n: u32) -> Projective {
-    ArkConf::GENERATOR * Fr::from(n)
-}
+pub mod conv_print_utils;
+pub use conv_print_utils::*;
 
 #[cfg(test)]
 mod circuit_tests {
     use ark_bp_pp::arithmetic_circuits::*;
-    use ark_ec::CurveGroup;
     use ark_secp256k1::{Fr, Projective};
 
     use ark_std::{test_rng, vec::Vec};
@@ -131,12 +15,12 @@ mod circuit_tests {
     use bp_pp::util::minus;
     use k256::elliptic_curve::rand_core::OsRng;
     use k256::{ProjectivePoint, Scalar};
-    use std::ops::{Mul, Sub};
+    use std::ops::Sub;
 
-    use crate::{ark_pt, k256_pt, UniPri};
+    use crate::{pt_a, pt_k, UniPrint};
 
     #[test]
-    fn k256_circuit() {
+    fn k256() {
         let mut rand = OsRng::default();
         // Test the knowledge of x, y for public z, r, such:
         // x + y = r
@@ -180,12 +64,12 @@ mod circuit_tests {
         //println!("Circuit check: {:?} = {:?}", vector_mul(&W_m[0], &w), vector_hadamard_mul(&w_l, &w_r));
         //println!("Circuit check: {:?} = 0", vector_add(&vector_add(&vec![vector_mul(&W_l[0], &w), vector_mul(&W_l[1], &w)], &w_v), &a_l));
 
-        let g = k256_pt(95484835);
+        let g = pt_k(95484835);
         let g_vec = (0..1)
-            .map(|i| k256_pt(23415 * i))
+            .map(|i| pt_k(23415 * i))
             .collect::<Vec<ProjectivePoint>>();
         let h_vec = (0..16)
-            .map(|i| k256_pt(i + i * 3))
+            .map(|i| pt_k(i + i * 3))
             .collect::<Vec<ProjectivePoint>>();
 
         let partition = |typ: DLPartitionType, index: usize| -> Option<usize> {
@@ -232,14 +116,14 @@ mod circuit_tests {
         let proof = circuit.prove::<OsRng>(&v, witness, &mut pt, &mut rand);
 
         // ser_proof.c_l.upr("KCL:");
-        println!("{}", k256_pt(25));
+        println!("{}", pt_k(25).pr());
 
         let mut vt = merlin::Transcript::new(b"circuit test");
         assert!(circuit.verify(&v, &mut vt, proof));
     }
 
     #[test]
-    fn ark_circuit() {
+    fn ark() {
         let mut rand = test_rng();
 
         // Test the knowledge of x, y for public z, r, such:
@@ -273,12 +157,10 @@ mod circuit_tests {
 
         let a_l = vec![-r, -z]; // Nl
 
-        let g = ark_pt(95484835);
-        let g_vec = (0..1)
-            .map(|i| ark_pt(23415 * i))
-            .collect::<Vec<Projective>>();
+        let g = pt_a(95484835);
+        let g_vec = (0..1).map(|i| pt_a(23415 * i)).collect::<Vec<Projective>>();
         let h_vec = (0..16)
-            .map(|i| ark_pt(i + i * 3))
+            .map(|i| pt_a(i + i * 3))
             .collect::<Vec<Projective>>();
 
         let partition = |typ: PartitionType, index: usize| -> Option<usize> {
@@ -327,7 +209,7 @@ mod circuit_tests {
         // let ser_proof = SerializableProof::from(&proof);
 
         // print_pt("ACL:", ser_proof.c_l);
-        println!("{}", ark_pt(25));
+        println!("{}", pt_a(25).pr());
 
         let mut vt = merlin::Transcript::new(b"circuit test");
         assert!(circuit.verify(&v, &mut vt, proof));
