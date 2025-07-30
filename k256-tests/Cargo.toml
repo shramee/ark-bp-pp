@@ -16,5 +16,5 @@ ark-starkcurve = { workspace = true }
 ark-secp256k1 = { workspace = true }
 hashbrown = { workspace = true }
 bp-pp = { version = "0.1.1", path = "../../bp-pp" }
-k256 = "0.13.4"
+k256 = { path = "../../k256", features = ["arithmetic", "expose-field"] }
 ark-bp-pp = { version = "0.1.0", path = ".." }
