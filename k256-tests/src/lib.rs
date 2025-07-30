@@ -1,26 +1,90 @@
 #![allow(non_snake_case)]
 
+use ark_ec::AffineRepr;
+use ark_ec::CurveGroup;
+use ark_ff::{BigInteger, PrimeField};
+use ark_secp256k1::{Affine, Fr, Projective};
+use k256::elliptic_curve::point::AffineCoordinates;
+use k256::{AffinePoint, ProjectivePoint, Scalar};
+
+trait UniPri {
+    fn upr(self, label: &str);
+}
+
+impl UniPri for Fr {
+    fn upr(self, label: &str) {
+        // self.into_affine().upr(label)
+    }
+}
+
+impl UniPri for Scalar {
+    fn upr(self, label: &str) {
+        // self.into_affine().upr(label)
+    }
+}
+
+impl UniPri for Projective {
+    fn upr(self, label: &str) {
+        self.into_affine().upr(label)
+    }
+}
+impl UniPri for Affine {
+    fn upr(self, label: &str) {
+        let (x, _) = self.xy().unwrap();
+        if label.len() > 0 {
+            println!("{label} {}", hex(&x.into_bigint().to_bytes_be()));
+        } else {
+            println!("{}", hex(&x.into_bigint().to_bytes_be()));
+        }
+    }
+}
+
+impl UniPri for ProjectivePoint {
+    fn upr(self, label: &str) {
+        self.to_affine().upr(label)
+    }
+}
+impl UniPri for AffinePoint {
+    fn upr(self, label: &str) {
+        if label.len() > 0 {
+            println!("{label} {}", hex(&self.x()));
+        } else {
+            println!("{}", hex(&self.x()));
+        }
+    }
+}
+
+impl<T: UniPri + Copy> UniPri for &[T] {
+    fn upr(self, label: &str) {
+        if label.len() > 0 {
+            println!("{label}");
+        }
+        self.iter().for_each(|f| f.upr("  "));
+    }
+}
+
+/// Convert bytes to uppercase hex string
+pub fn hex(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{:02X}", b)).collect()
+}
+
 #[cfg(test)]
 mod circuit_tests {
     use ark_bp_pp::arithmetic_circuits::*;
     use ark_ec::short_weierstrass::SWCurveConfig;
-    use ark_ec::{AffineRepr, CurveGroup};
-    use ark_ff::{BigInteger, PrimeField};
-    use ark_secp256k1::{Affine, Config as ArkConf, Fr, Projective};
-    use ark_serialize::CanonicalSerialize;
-    use ark_std::{test_rng, vec::Vec};
+    use ark_ec::CurveGroup;
+    use ark_secp256k1::{Config as ArkConf, Fr, Projective};
 
+    use ark_std::{test_rng, vec::Vec};
     use bp_pp::circuit::{
-        ArithmeticCircuit as DLCircuit, PartitionType as DLPartitionType,
-        SerializableProof as DLSerializableProof, Witness as DLWitness,
+        ArithmeticCircuit as DLCircuit, PartitionType as DLPartitionType, Witness as DLWitness,
     };
     use bp_pp::util::minus;
-
-    use k256::elliptic_curve::point::AffineCoordinates;
     use k256::elliptic_curve::rand_core::OsRng;
-    use k256::{AffinePoint, ProjectivePoint, Scalar};
-
+    use k256::{ProjectivePoint, Scalar};
     use std::ops::{Mul, Sub};
+
+    use crate::UniPri;
 
     fn k256_pt(n: u32) -> ProjectivePoint {
         let n = Scalar::from(n);
@@ -126,10 +190,9 @@ mod circuit_tests {
 
         let mut pt = merlin::Transcript::new(b"circuit test");
         let proof = circuit.prove::<OsRng>(&v, witness, &mut pt, &mut rand);
-        let ser_proof = DLSerializableProof::from(&proof);
 
-        // print_kpt("KCL:", ser_proof.c_l);
-        print_kpt("K25", k256_pt(25).to_affine());
+        // ser_proof.c_l.upr("KCL:");
+        k256_pt(25).to_affine().upr("K25");
 
         let mut vt = merlin::Transcript::new(b"circuit test");
         assert!(circuit.verify(&v, &mut vt, proof));
@@ -224,23 +287,9 @@ mod circuit_tests {
         let ser_proof = SerializableProof::from(&proof);
 
         // print_pt("ACL:", ser_proof.c_l);
-        print_pt("A25", ark_pt(25).into_affine());
+        ark_pt(25).into_affine().upr("A25");
 
         let mut vt = merlin::Transcript::new(b"circuit test");
         assert!(circuit.verify(&v, &mut vt, proof));
-    }
-
-    fn print_kpt(label: &str, k_pt: AffinePoint) {
-        println!("{label}: {}", hex(&k_pt.x()));
-    }
-
-    fn print_pt(label: &str, ark_pt: Affine) {
-        let (x, y) = ark_pt.xy().unwrap();
-        println!("{label}: \"{}\"", hex(&x.into_bigint().to_bytes_be()));
-    }
-
-    /// Convert bytes to uppercase hex string
-    pub fn hex(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{:02X}", b)).collect()
     }
 }
