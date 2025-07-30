@@ -13,6 +13,8 @@ ark-ec = { workspace = true }
 ark-serialize = { workspace = true }
 ark-std = { workspace = true }
 ark-starkcurve = { workspace = true }
+ark-secp256k1 = { workspace = true }
 hashbrown = { workspace = true }
 bp-pp = { version = "0.1.1", path = "../../bp-pp" }
 k256 = "0.13.4"
+ark-bp-pp = { version = "0.1.0", path = ".." }

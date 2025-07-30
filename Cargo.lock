@@ -141,6 +141,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ark-secp256k1"
+version = "0.5.0"
+source = "git+https://github.com/arkworks-rs/algebra?rev=a13c018816522de2411082db27e95c748c001642#a13c018816522de2411082db27e95c748c001642"
+dependencies = [
+ "ark-ec",
+ "ark-ff",
+ "ark-std 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "ark-serialize"
 version = "0.5.0"
 source = "git+https://github.com/arkworks-rs/algebra?rev=a13c018816522de2411082db27e95c748c001642#a13c018816522de2411082db27e95c748c001642"
@@ -671,8 +681,10 @@ dependencies = [
 name = "k256-tests"
 version = "0.1.0"
 dependencies = [
+ "ark-bp-pp",
  "ark-ec",
  "ark-ff",
+ "ark-secp256k1",
  "ark-serialize",
  "ark-starkcurve",
  "ark-std 0.5.0 (git+https://github.com/arkworks-rs/std/)",

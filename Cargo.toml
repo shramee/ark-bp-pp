@@ -12,6 +12,7 @@ ark-ec = { git = "https://github.com/arkworks-rs/algebra", rev = "a13c018816522d
 ark-serialize = { git = "https://github.com/arkworks-rs/algebra", rev = "a13c018816522de2411082db27e95c748c001642" }
 ark-std = { git = "https://github.com/arkworks-rs/std/", version = "0.5.0" }
 ark-starkcurve = { git = "https://github.com/arkworks-rs/algebra", rev = "a13c018816522de2411082db27e95c748c001642" }
+ark-secp256k1 = { git = "https://github.com/arkworks-rs/algebra", rev = "a13c018816522de2411082db27e95c748c001642" }
 hashbrown = "0.15.4"
 
 [package]

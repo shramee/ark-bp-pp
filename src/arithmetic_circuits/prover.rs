@@ -1,10 +1,7 @@
 pub use super::types::*;
 use ark_ec::CurveGroup;
 use ark_ff::{Field, UniformRand};
-use ark_std::{
-    rand::{CryptoRng, RngCore},
-    vec::Vec,
-};
+use ark_std::{rand::RngCore, vec::Vec};
 use merlin::Transcript;
 
 use crate::{transcript, util::*, wnla::WeightNormLinearArgument};

@@ -1,5 +1,6 @@
 use ark_ec::CurveGroup;
 use ark_ff::PrimeField;
+use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
 use ark_std::vec::Vec;
 
 #[derive(Clone, Debug, Copy, PartialEq)]
@@ -24,7 +25,7 @@ pub struct Proof<C: CurveGroup> {
 }
 
 /// Represent serializable version of arithmetic circuit proof (uses Affine instead of Projective).
-#[derive(Clone, Debug)]
+#[derive(CanonicalDeserialize, CanonicalSerialize, Clone, Debug)]
 pub struct SerializableProof<C: CurveGroup> {
     pub c_l: C::Affine,
     pub c_r: C::Affine,

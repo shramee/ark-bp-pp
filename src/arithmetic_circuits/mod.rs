@@ -8,8 +8,6 @@ pub mod utils;
 pub mod verifier;
 
 pub use prover::*;
-pub use utils::*;
-pub use verifier::*;
 
 #[cfg(test)]
 mod circuit_tests {
@@ -53,11 +51,6 @@ mod circuit_tests {
         let W_l = vec![vec![zero, one, zero, zero], vec![zero, -one, one, zero]]; // Nl*Nw
 
         let a_l = vec![-r, -z]; // Nl
-
-        //let w_v = vec![Fr::from(x), Fr::from(y)];
-        //let w = vec![Fr::from(x), Fr::from(y), Fr::from(z), Fr::from(r)]; // w = wl||wr||wo
-        //println!("Circuit check: {:?} = {:?}", vector_mul(&W_m[0], &w), vector_hadamard_mul(&w_l, &w_r));
-        //println!("Circuit check: {:?} = 0", vector_add(&vector_add(&vec![vector_mul(&W_l[0], &w), vector_mul(&W_l[1], &w)], &w_v), &a_l));
 
         let g = Projective::rand(&mut rand);
         let g_vec = (0..1)
